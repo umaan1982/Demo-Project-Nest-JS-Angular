@@ -1,8 +1,37 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { AuthenticationService } from '../../services/authentication.service';
 import { Router } from '@angular/router';
 import { map } from 'rxjs';
+
+class CustomValidators{
+  static passwordContainsNumber(control : AbstractControl): ValidationErrors | null{
+    const regex = /\d/;
+
+    if(regex.test(control.value) && control.value !== null){
+      return null;
+    }
+    else{
+      return {
+        passwordInvalid: true
+      };
+    }
+  }
+
+  static passwordMatches(control: AbstractControl) : ValidationErrors | null {
+    const password = control.get('password')?.value;
+    const passwordConfirm = control.get('passwordConfirm')?.value;
+
+    if(password === passwordConfirm && password !== null && passwordConfirm !== null){
+      return null;
+    }
+    else{
+        return {
+          passwordNotMatching : true
+        };
+    }
+  }
+}
 
 @Component({
   selector: 'app-register',
@@ -33,11 +62,11 @@ export class RegisterComponent implements OnInit{
       password: [null, [
         Validators.required,
         Validators.minLength(6),
-        //CustomValidators.passwordContainsNumber
+        CustomValidators.passwordContainsNumber
       ]],
       passwordConfirm: [null, [Validators.required]]
     }, {
-      //validators : CustomValidators.passwordMatches
+      validators : CustomValidators.passwordMatches
     })
 
     //Another way of creating a form group
